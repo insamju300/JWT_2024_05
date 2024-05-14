@@ -1,6 +1,6 @@
-package com.korea_it.jwt_2024_05.base.jwt;
+package com.korea_it.jwt_2024_05.util;
 
-import com.korea_it.jwt_2024_05.utill.Ut;
+import com.korea_it.jwt_2024_05.util.Ut;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import io.jsonwebtoken.security.Keys;
@@ -39,5 +39,29 @@ public class JwtProvider {
                 .setExpiration(accessTokenExpiresIn)
                 .signWith(getSecretKey(), SignatureAlgorithm.HS512)
                 .compact();
+    }
+
+    public boolean verify(String token) {
+        try {
+            Jwts.parserBuilder()
+                    .setSigningKey(getSecretKey())
+                    .build()
+                    .parseClaimsJws(token);
+        } catch (Exception e) {
+            return false;
+        }
+
+        return true;
+    }
+
+    public Map<String, Object> getClaims(String token) {
+        String body = Jwts.parserBuilder()
+                .setSigningKey(getSecretKey())
+                .build()
+                .parseClaimsJws(token)
+                .getBody()
+                .get("body", String.class);
+
+        return Ut.json.toMap(body);
     }
 }

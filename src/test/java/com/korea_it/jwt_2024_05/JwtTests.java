@@ -1,13 +1,13 @@
 package com.korea_it.jwt_2024_05;
 
-import com.korea_it.jwt_2024_05.base.jwt.JwtProvider;
-import com.korea_it.jwt_2024_05.base.jwt.JwtProvider;
+
 import io.jsonwebtoken.security.Keys;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
+import com.korea_it.jwt_2024_05.util.JwtProvider;
 
 import javax.crypto.SecretKey;
 import java.util.Base64;
@@ -72,5 +72,37 @@ class JwtTests {
         System.out.println("accessToken: " + accessToken);
 
         assertThat(accessToken).isNotNull();
+    }
+
+    @Test
+    @DisplayName("accessToken은 만료가 되면 유효하지 않다.")
+    void t6() {
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("id", 1L);
+        claims.put("username", "admin");
+
+        String accessToken = jwtProvider.genToken(claims, -1);
+
+        System.out.println("accessToken: " + accessToken);
+
+        assertThat(jwtProvider.verify(accessToken)).isFalse();
+    }
+
+    @Test
+    @DisplayName("accessToken을 통해서 claims를 얻을 수 있다.")
+    void t7() {
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("id", 1L);
+        claims.put("username", "admin");
+
+        String accessToken = jwtProvider.genToken(claims, 60 * 60 * 5);
+
+        System.out.println("accessToken: " + accessToken);
+
+        assertThat(jwtProvider.verify(accessToken)).isTrue();
+
+        Map<String, Object> claimsFromToken = jwtProvider.getClaims(accessToken);
+
+        System.out.println("claimsFromToken: " + claimsFromToken);
     }
 }
